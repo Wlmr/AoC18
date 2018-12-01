@@ -3,7 +3,7 @@ import Data.Maybe
 import System.Environment
 import Lib
 
-fDict = [("d1",d1),("d1b",d1b)]
+fDict = [("d1a",d1a),("d1b",d1b)]
 
 main :: IO ()
 main = do

@@ -1,18 +1,22 @@
 module Lib
-    ( d1
+    ( d1a
     , d1b
     ) where
 
-d1 :: String -> String
-d1 = show . sum . map readSigned . lines 
-        where readSigned sInt = if '+' == head sInt then (read . tail) sInt else read sInt
+-- DAY 1:
+
+d1a :: String -> String
+d1a = show . sum . map readSigned . lines 
 
 d1b :: String -> String
-d1b = show . firstToTwo [0] 0 . cycle . map readSigned . lines 
-        where readSigned signInt = if '+' == head signInt then (read . tail) signInt else read signInt
+d1b = show . firstDuplicate [0] 0 . cycle . map readSigned . lines 
 
---helper for d1b
-firstToTwo :: [Int] -> Int -> [Int] -> Int
-firstToTwo temp val []     = 0
-firstToTwo temp val (x:xs) = if x' `elem` temp then x' else firstToTwo (x':temp) x' xs 
+readSigned :: String -> Int
+readSigned s = if '+' == head s then (read . tail) s else read s
+
+firstDuplicate :: [Int] -> Int -> [Int] -> Int
+firstDuplicate temp val []     = 0
+firstDuplicate temp val (x:xs) = if x' `elem` temp then x' else firstDuplicate (x':temp) x' xs 
         where x' = val+x 
+
+-- DAY 2:
