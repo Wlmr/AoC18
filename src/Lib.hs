@@ -1,7 +1,11 @@
 module Lib
     ( d1a
     , d1b
+    , d2a
+    , d2b
     ) where
+
+import Data.List
 
 -- DAY 1:
 
@@ -20,3 +24,14 @@ firstDuplicate temp val (x:xs) = if x' `elem` temp then x' else firstDuplicate (
         where x' = val+x 
 
 -- DAY 2:
+
+d2a :: String -> String
+d2a = show . uncurry (*) . foldl1 (\(a,b) (x,y) -> (a+x,b+y)) . map (foldl twoAndThreeCounter (0,0) . map length . group . sort) . lines
+
+twoAndThreeCounter :: (Int, Int) -> Int -> (Int, Int)
+twoAndThreeCounter (0,  three) 2 = (1,three)
+twoAndThreeCounter (two,    0) 3 = (two,1)
+twoAndThreeCounter (two,three) _ = (two,three) 
+
+d2b :: String -> String
+d2b s = s
