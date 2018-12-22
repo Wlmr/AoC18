@@ -3,9 +3,11 @@ module Lib
     , d1b
     , d2a
     , d2b
+    , d3a
     ) where
 
 import Data.List
+import Text.Regex.Posix
 
 -- DAY 1:
 d1a :: String -> String
@@ -50,3 +52,47 @@ commonLetters (x:xs) (y:ys)
     | x == y    = x : commonLetters xs ys
     | otherwise = "" ++ commonLetters xs ys
 commonLetters _ _ = ""
+
+
+--day 3
+data Square = Square Int Int Int Int deriving Show
+type Fabric = [[Int]] 
+
+d3a :: String -> String
+d3a = show . twoOrMoreSum . foldl squareAdder t0 . map (square2Fabric size . string2Square) . lines
+        where   size = 1000
+                t0   = [[0 | x <- [1..size]] | y <- [1..size]]
+
+string2Square :: String -> Square 
+string2Square s = Square x y dx dy
+    where (x:y:dx:dy:trash) = (tail . map read . concat) (s =~ "[0-9]+" :: [[String]])
+
+square2Fabric :: Int -> Square -> Fabric
+square2Fabric size (Square x y dx dy) = pre ++ sqr ++ post
+    where pre  = [[0 | col <- [1..size]]    | row <- [1..y]] 
+          sqr  = [[0 | col <- [1..x]] ++ [1 | col <- [1..dx]]
+               ++ [0 | col <- [x+dx..size]] | row <- [1..dy-1]]
+          post = [[0 | col <- [1..size]]    | row <- [y+dy-1..size]] 
+
+squareAdder :: Fabric -> Fabric -> Fabric
+squareAdder = zipWith (zipWith (+))
+
+twoOrMoreSum :: Fabric -> Int
+twoOrMoreSum = sum . map (length . filter (1<))
+
+d3b :: String -> String 
+d3b = show . map (elemIndices 1) . foldl squareAdder t0 . map (square2Fabric size . string2Square) . lines
+        where   size = 1000
+                t0   = [[0 | x <- [1..size]] | y <- [1..size]]
+
+
+--day4
+
+--d4a :: String -> String
+--d4a = id --lines
+--
+--d5a :: String -> String
+--d5a lst 
+--  | [a]      = ""
+--  | (a:bc)   = 
+--  | (a:b:cd) =   
