@@ -4,6 +4,7 @@ module Lib
     , d2a
     , d2b
     , d3a
+    , d3b
     ) where
 
 import Data.List
@@ -11,18 +12,18 @@ import Text.Regex.Posix
 
 -- DAY 1:
 d1a :: String -> String
-d1a = show . sum . map readSigned . lines 
+d1a = show . sum . map readSigned . lines
 
 d1b :: String -> String
-d1b = show . firstDuplicate [0] 0 . cycle . map readSigned . lines 
+d1b = show . firstDuplicate [0] 0 . cycle . map readSigned . lines
 
 readSigned :: String -> Int
 readSigned s = if '+' == head s then (read . tail) s else read s
 
 firstDuplicate :: [Int] -> Int -> [Int] -> Int
 firstDuplicate temp val []     = 0
-firstDuplicate temp val (x:xs) = if x' `elem` temp then x' else firstDuplicate (x':temp) x' xs 
-        where x' = val+x 
+firstDuplicate temp val (x:xs) = if x' `elem` temp then x' else firstDuplicate (x':temp) x' xs
+        where x' = val+x
 
 -- DAY 2:
 d2a :: String -> String
@@ -31,7 +32,7 @@ d2a = show . uncurry (*) . foldl1 (\(a,b) (x,y) -> (a+x,b+y)) . map (foldl twoAn
 twoAndThreeCounter :: (Int, Int) -> Int -> (Int, Int)
 twoAndThreeCounter (0,  three) 2 = (1,three)
 twoAndThreeCounter (two,    0) 3 = (two,1)
-twoAndThreeCounter (two,three) _ = (two,three) 
+twoAndThreeCounter (two,three) _ = (two,three)
 
 d2b :: String -> String
 d2b s = closestMatch (x:xs) xs ++ "\n"
@@ -55,24 +56,24 @@ commonLetters _ _ = ""
 
 
 --day 3
-data Square = Square Int Int Int Int deriving Show
-type Fabric = [[Int]] 
+data Square = Square Int Int Int Int deriving (Eq,Show)
+type Fabric = [[Int]]
 
 d3a :: String -> String
 d3a = show . twoOrMoreSum . foldl squareAdder t0 . map (square2Fabric size . string2Square) . lines
         where   size = 1000
                 t0   = [[0 | x <- [1..size]] | y <- [1..size]]
 
-string2Square :: String -> Square 
+string2Square :: String -> Square
 string2Square s = Square x y dx dy
     where (x:y:dx:dy:trash) = (tail . map read . concat) (s =~ "[0-9]+" :: [[String]])
 
 square2Fabric :: Int -> Square -> Fabric
 square2Fabric size (Square x y dx dy) = pre ++ sqr ++ post
-    where pre  = [[0 | col <- [1..size]]    | row <- [1..y]] 
+    where pre  = [[0 | col <- [1..size]]    | row <- [1..y]]
           sqr  = [[0 | col <- [1..x]] ++ [1 | col <- [1..dx]]
                ++ [0 | col <- [x+dx..size]] | row <- [1..dy-1]]
-          post = [[0 | col <- [1..size]]    | row <- [y+dy-1..size]] 
+          post = [[0 | col <- [1..size]]    | row <- [y+dy-1..size]]
 
 squareAdder :: Fabric -> Fabric -> Fabric
 squareAdder = zipWith (zipWith (+))
@@ -80,10 +81,40 @@ squareAdder = zipWith (zipWith (+))
 twoOrMoreSum :: Fabric -> Int
 twoOrMoreSum = sum . map (length . filter (1<))
 
-d3b :: String -> String 
-d3b = show . map (elemIndices 1) . foldl squareAdder t0 . map (square2Fabric size . string2Square) . lines
-        where   size = 1000
-                t0   = [[0 | x <- [1..size]] | y <- [1..size]]
+
+
+--d3b :: String -> String
+--d3b inp = findOrderNbr
+--        where   size              = 1000
+--                t0                = [[0 | x <- [1..size]] | y <- [1..size]]
+--                nonEmpty (i,j)    = (not . null) j
+--                mtx               = (foldl squareAdder t0 . map (square2Fabric size . string2Square) . lines) inp
+--                order             = string2Square . toString . filter nonEmpty . oneFinder (size-1) $ mtx
+--                Just findOrderNbr = find ((==order) . string2Square) (lines inp)
+
+
+d3b :: String -> String
+d3b inp = show order
+        where   size              = 1000
+                t0                = [[0 | x <- [1..size]] | y <- [1..size]]
+                nonEmpty (i,j)    = (not . null) j
+                mtx               = (foldl squareAdder t0 . map (square2Fabric size . string2Square) . lines) inp
+                order             = filter nonEmpty . oneFinder (size-1) $ mtx
+                --Just findOrderNbr = find ((==order) . string2Square) (lines inp)
+
+
+-- returns [(row,[col])]
+oneFinder :: Int -> Fabric -> [(Int,[Int])]
+oneFinder (-1) f = []
+oneFinder   i  f = (i, findIndices (`elem` [1]) (f!!i)) : oneFinder (i-1) f
+
+toString :: [(Int,[Int])] -> String
+toString inp = "#" ++ someNbr ++ " @ " ++ show x ++ "," ++ show y ++ ": " ++ show dx ++"x" ++ show dy
+        where (y,xlist) = minimumBy (\(r0,_) (r1,_) -> compare r0 r1) inp
+              x         = minimum xlist
+              dx        = length xlist
+              dy        = length inp
+              someNbr   = show 133
 
 
 --day4
